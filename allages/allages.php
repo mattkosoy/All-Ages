@@ -1,7 +1,7 @@
 <?php
 /**
  * @package All Ages Vimeo Support
- * @version 0.4
+ * @version 0.2
  */
 /*
 Plugin Name: All Ages
@@ -108,7 +108,7 @@ function AA_insertSimpleXMlObj($data){
 				  'comment_status' => 'closed', 
 				  'ping_status' => 'closed', 
 				  'post_author' => $current_user->ID, 
-				  'post_content' =>  $vimeo_object.'<p>'.$update->description.'</p>',  
+				  'post_content' =>  $update->description,  
 				  'menu_order' => $i++,
 				  'post_date' => $update->upload_date, 
 				  'post_date_gmt' => $update->upload_date, 
@@ -123,16 +123,17 @@ function AA_insertSimpleXMlObj($data){
 				// check to see if this page already exists
 				$sql = "SELECT post_title FROM ".$wpdb->prefix."posts WHERE post_title = '" .  addslashes($update->title) . "'";
 				if($wpdb->get_row($sql, 'ARRAY_A')) { 
-					/* skip. this one has already been added added. */ 
 				} else {
 					// go ahead and insert new page record to local db.
 					$success = wp_insert_post( $post );
 					$sql = "SELECT id FROM ".$wpdb->prefix."posts WHERE post_type = 'page' ORDER BY id DESC LIMIT 0,1";
-					$recent_id = $wpdb->get_row($sql, 'ARRAY_A');
+					$recent_id = $wpdb->get_row($sql, 'ARRAY_A');			
 					// add vimeo info to post meta
-					foreach($update as $k=>$v){			
-						add_post_meta($recent_id['id'] , $k, $v);
+					foreach($update as $k=>$v){	
+						add_post_meta($recent_id['id'] , $k, addslashes($v));
 					}
+					// add vimeo object to a custom post field (post meta)
+					add_post_meta($recent_id['id'], 'vimeo_object', $vimeo_object);
 					//echo "Inserted: ".$update->title."\n";
 				}
 			}
@@ -168,7 +169,7 @@ function AA_insertPHP4XML($parser){
 			  'comment_status' => 'closed', 
 			  'ping_status' => 'closed', 
 			  'post_author' => $current_user->ID, 
-			  'post_content' =>  $vimeo_object.'<p>'.$update[2]->tagData.'</p>',  
+			  'post_content' =>  $vimeo_object.'<span>'.$update[2]->tagData.'</span>',  
 			  'menu_order' => $i++,
 			  'post_date' => $update[4]->tagData, 
 			  'post_date_gmt' => $update[4]->tagData, 
@@ -191,7 +192,7 @@ function AA_insertPHP4XML($parser){
 				$recent_id = $wpdb->get_row($sql, 'ARRAY_A');
 				// add vimeo info to post meta
 				foreach($update as $u){	
-					//print_r($u);
+					print_r($u);
 					echo $recent_id['id']." ".$u->tagName." ".$u->tagData." \n\n";
 					if(add_post_meta($recent_id['id'] , $u->tagName, $u->tagData)){ 
 					#	echo "SAVED\n";
@@ -236,7 +237,7 @@ function curlPage($url, $referer, $timeout, $header=0){
 function AA_settings_page() { 
 	$vimeo_username = get_option('vimeo_username'); 
 	$vimeo_parentPage = get_option('vimeo_parentPage'); 
-	$pages = get_posts(array('post_type'=>'page'));
+	$pages = get_posts(array('post_type'=>'page', 'post_parent'=>0));
 	if(is_array($pages)){
 		$page_options = array();
 		foreach($pages as $page){
@@ -284,37 +285,4 @@ function AA_settings_page() {
 </div>
 <?php } 
 
-
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-function AA_custom_pageTemplate(){ ?>
-	<div class="related_vids">
-		<? 
-			if($post->post_parent > 0){ 		//if we're looking at a sub-page get the siblings
-				$child_of = $post->post_parent;
-			} else { 							// if we're looking at a top level page,  get the children.  
-				$child_of =  $post->ID;
-			}
-			
-			$args = array(
-			'post_type'		=> 'page',  
-			'post_parent'		=> $child_of,
-			'exclude'		=> $post->ID,
-			'sort_column'	=> 'menu_order',
-			);
-	
-			$related_pages = get_posts($args);
-			foreach($related_pages as $r){
-				$thumb = get_post_meta($r->ID, 'thumbnail_medium');
-				echo '<div class="left">';
-				echo '<a href="'.$r->guid.'">';
-				echo '<img height="100" width="154" src="'.$thumb[0].'" alt="'.$r->post_title.'" /><br/>';
-				echo $r->post_title;
-				echo '</a>';
-				echo '</div>';
-			}
-		?>
-	</div>
-<? }
-
-
-
