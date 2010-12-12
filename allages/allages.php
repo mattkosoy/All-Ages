@@ -163,14 +163,8 @@ function AA_insertPHP4XML($parser){
 		foreach($vimeo_info as $data){
 			// create a wp post object for each vimeo record
 			$update = $data->tagChildren;
-			$vimeo_object = '
-<object width="640" height="360">
-	<param name="allowfullscreen" value="true" />
-	<param name="allowscriptaccess" value="always" />
-	<param name="movie" value="http://vimeo.com/moogaloop.swf?clip_id='.$update[0]->tagData.'&amp;server=vimeo.com&amp;show_title=0&amp;show_byline=0&amp;show_portrait=0&amp;color=ff0179&amp;fullscreen=1" />
-	<embed src="http://vimeo.com/moogaloop.swf?clip_id='.$update[0]->tagData.'&amp;server=vimeo.com&amp;show_title=0&amp;show_byline=0&amp;show_portrait=0&amp;color=ff0179&amp;fullscreen=1" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="640" height="360"></embed>
-</object>
-';
+			$vimeo_object = '<iframe src="http://player.vimeo.com/video/'.$update->id.'?show_title=0&amp;show_byline=0&amp;show_portrait=0&amp;color=ff0179&amp;fullscreen=1" width="640" height="360" frameborder="0"></iframe>';
+
 			$post = array(
 			  'ID' => null, 
 			  'comment_status' => 'closed', 
