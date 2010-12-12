@@ -1,14 +1,14 @@
 <?php
 /**
  * @package All Ages Vimeo Support
- * @version 0.2
+ * @version 0.4
  */
 /*
 Plugin Name: All Ages
 Plugin URI: http://allagesproductions.com/
 Description: This will create a page, and a thumbnail for each video that a particular user has uploaded.   The public side displays a grid of thumbnails that link internally.  This allows for a high level of customization for branding & redisplaying video content.
 Author: Matt Kosoy
-Version: 0.2
+Version: 0.4
 Author URI: http://mattkosoy.com/
 */
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -94,15 +94,25 @@ function AA_insertSimpleXMlObj($data){
 			$i=0; // counter for default display order
 			// if data is returned then loop through json object 
 			foreach($data->video as $update){
-				// create a wp post object for each vimeo record
-				$vimeo_object = '
+				
+				
+				// check to see if this page already exists
+				$sql = "SELECT post_title FROM ".$wpdb->prefix."posts WHERE post_title = '" .  addslashes($update->title) . "'";
+				if($wpdb->get_row($sql, 'ARRAY_A')) { 
+					// it exists. skip.
+				} else {
+				// create a wp post object for a new vimeo record
+/*				$vimeo_object = '
 	<object width="640" height="360">
 		<param name="allowfullscreen" value="true" />
 		<param name="allowscriptaccess" value="always" />
-		<param name="movie" value="http://vimeo.com/moogaloop.swf?clip_id='.$update->id.'&amp;server=vimeo.com&amp;show_title=0&amp;show_byline=0&amp;show_portrait=0&amp;color=ff0179&amp;fullscreen=1" />
+		<param name="movie" value="http://vimeo.com/moogaloop.swf?clip_id='.$update->id.'" />
 		<embed src="http://vimeo.com/moogaloop.swf?clip_id='.$update->id.'&amp;server=vimeo.com&amp;show_title=0&amp;show_byline=0&amp;show_portrait=0&amp;color=ff0179&amp;fullscreen=1" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="640" height="360"></embed>
 	</object>
 	';
+*/
+				$vimeo_object = '<iframe src="http://player.vimeo.com/video/'.$update->id.'?show_title=0&amp;show_byline=0&amp;show_portrait=0&amp;color=ff0179&amp;fullscreen=1" width="640" height="360" frameborder="0"></iframe>';
+
 				$post = array(
 				  'ID' => null, 
 				  'comment_status' => 'closed', 
@@ -120,10 +130,7 @@ function AA_insertSimpleXMlObj($data){
 				  'post_type' => 'page',
 				  'tags_input' => explode(',',$update->tags), 
 				); 
-				// check to see if this page already exists
-				$sql = "SELECT post_title FROM ".$wpdb->prefix."posts WHERE post_title = '" .  addslashes($update->title) . "'";
-				if($wpdb->get_row($sql, 'ARRAY_A')) { 
-				} else {
+				
 					// go ahead and insert new page record to local db.
 					$success = wp_insert_post( $post );
 					$sql = "SELECT id FROM ".$wpdb->prefix."posts WHERE post_type = 'page' ORDER BY id DESC LIMIT 0,1";

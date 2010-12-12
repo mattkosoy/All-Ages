@@ -2,8 +2,8 @@
 Contributors: @mattkosoy
 Tags: vimeo, plugin
 Requires at least: 2.9.2
-Tested up to: 2.9.2
-Stable tag: 0.3
+Tested up to: 3.0.3
+Stable tag: 0.4
 
 A plugin to grab and save a list of videos from Viemo. 
 
@@ -23,6 +23,7 @@ This will create a page for each video that a particular user has uploaded to vi
 
 == Changelog ==
 
+0.4 - switched to vimeo's iframe based player
 0.3 - added in support for wpdb->prefix
 0.2 - updated to support php 4
 0.1 - added plugin admin screens, and enabled automatic importing of vimeo data into wpdb.
