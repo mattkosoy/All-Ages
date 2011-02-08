@@ -1,14 +1,14 @@
 === All_Ages  ===
 Contributors: @mattkosoy
 Tags: vimeo, plugin
-Requires at least: 2.9.2
-Tested up to: 3.0.3
-Stable tag: 0.4
+Requires at least: 3.0.4
+Tested up to: 3.0.4
+Stable tag: 1.0
 
-A plugin to grab and save a list of videos from Viemo. 
+A plugin that allows you to integrate content from Vimeo into your Wordpress site. 
 
 == Description ==
-This will create a page for each video that a particular user has uploaded to vim, and associates it to a parent page of the admin's choice.  Also, this plugin saves all vimeo api data to the local db, and associates it to these dynamic pages as wp post_meta data.  
+This will create a custom post type & custom taxonomy specific for Video content. This supports the new Vimeo HTML5 video player. This plugin saves all vimeo api data locally.  
  
 == Installation ==
 
@@ -23,7 +23,8 @@ This will create a page for each video that a particular user has uploaded to vi
 
 == Changelog ==
 
-0.4 - switched to vimeo's iframe based player
+1.0 - added support for custom post types & custom taxonomies. Dropped support for PHP4 xml parsing.  Plugin structure has been greatly improved.
+0.4 - switched to HTML5 video player
 0.3 - added in support for wpdb->prefix
 0.2 - updated to support php 4
 0.1 - added plugin admin screens, and enabled automatic importing of vimeo data into wpdb.
