@@ -1,14 +1,14 @@
 <?php
 /**
- * @package All Ages Vimeo Integration
- * @version 1.0
+ * @package All Ages Video Support
+ * @version 1.0.2	
  */
 /*
 Plugin Name: All Ages
 Plugin URI: https://github.com/mattkosoy/All-Ages
-Description: This will create a custom post type & custom taxonomy specific for Video content. This supports the new Vimeo HTML5 video player. This plugin saves all vimeo api data locally.  
+Description: This will create a page, and a thumbnail for each video that a particular user has uploaded.   The public side displays a grid of thumbnails that link internally.  This allows for a high level of customization for branding & redisplaying video content.
 Author: Matt Kosoy
-Version: 1.0
+Version: 1.0.2
 Author URI: http://mattkosoy.com/
 */
 
@@ -256,55 +256,41 @@ function AA_insertSimpleXMlObj($data){
 		  'numberposts'     => -1,
 		  'caller_get_posts'=> 1
 		);
-		$existing_videos = get_posts($args);		
-		
-		
-		
-		
+		$existing_videos = get_posts($args);			
 		
 		foreach($data->video as $update){
 			$Video_object = '<iframe src="http://player.vimeo.com/video/'.$update->id.'?show_title=0&amp;show_byline=0&amp;show_portrait=0&amp;color=ff0179&amp;fullscreen=1" width="640" height="360" frameborder="0"></iframe>';
-			
-			
 			$query_for_post_id = "SELECT post_id FROM  ".$wpdb->postmeta." WHERE meta_key = 'id' and meta_value = '". $update->id ."' LIMIT 0,1";
 			$result = $wpdb->get_results($query_for_post_id);
-			
 			if(isset($result[0]->post_id)){ // we've got a match
-			
 				// it exists. update it with the information from Video.
-				
-				$row = get_single_post($result[0]->post_id);
-				
+				$row = wp_get_single_post($result[0]->post_id);
 				$post = array(
 				  'ID' => $result[0]->post_id, 
 				  'comment_status' => 'closed', 
 				  'ping_status' => 'closed', 
 				  'post_author' => $current_user->ID, 
-				  'post_content' =>  $update->description,  
+				  'post_content' => $row->post_content,		// keep the existing post content  
 				  'menu_order' => $row->menu_order,
 				  'post_date' => $update->upload_date, 
 				  'post_date_gmt' => $update->upload_date, 
 				  'post_excerpt' => $update->url, 
-				  'post_name' => $update->title,
+				  'post_name' => $row->post_title,
 				  //'post_parent' =>$row->post_parent, 
 				  'post_status' => $row->post_status,  
-				  'post_title' => addslashes($update->title),
+				  'post_title' => $row->post_title,	// keep the same title 
 				  'post_type' => 'Video',
 				  'tags_input' => explode(',',$update->tags), 
 				); 
-				
 				$success = wp_update_post($post);
-				echo 'Updated Video:  '. $update->title."\n";
-				print_r($post);
-				
-
+				#echo 'Updated Video:  '. $update->title."\n";
+				#print_r($post);
 				foreach($update as $k=>$v){	
-					echo "UPDATE META key = ".$k." & value = ".$v." \n";
+					#echo "UPDATE META key = ".$k." & value = ".$v." \n";
 					update_post_meta($row->ID , $k, addslashes($v));
 				}
-					update_post_meta($row->ID, 'vimeo_object', $Video_object);
-				
-					echo "- - - - - - - - - - - - - - - - - - - - "."\n";
+				update_post_meta($row->ID, 'vimeo_object', $Video_object);
+				#echo "- - - - - - - - - - - - - - - - - - - - "."\n";
 			} else {
 			// add new video post
 				$post = array(
@@ -326,23 +312,19 @@ function AA_insertSimpleXMlObj($data){
 				); 
 				// go ahead and insert new page record to local db.
 				$success = wp_insert_post( $post );
-				$sql = "SELECT id FROM ".$wpdb->prefix."posts WHERE post_type = 'page' ORDER BY id DESC LIMIT 0,1";
+				$sql = "SELECT id FROM ".$wpdb->prefix."posts WHERE post_type = 'Video' ORDER BY id DESC LIMIT 0,1";
 				$recent_id = $wpdb->get_row($sql, 'ARRAY_A');			
 				// add Video info to post meta
-				echo "Inserted: ".$update->title."\n";
-				print_r($post);
-				
+				#echo "Inserted: ".$update->title."\n";
+				#print_r($post);
 				foreach($update as $k=>$v){	
-					echo "ADD META key = ".$k." & value = ".$v." \n";
-
+					#echo "ADD META key = ".$k." & value = ".$v." \n";
 					add_post_meta($recent_id['id'] , $k, addslashes($v));
 				}
 				// add Video object to a custom post field (post meta)
 				add_post_meta($recent_id['id'], 'vimeo_object', $Video_object);
-				
-				echo "- - - - - - - - - - - - - - - - - - - - "."\n";
-				
-			} // end switch on insert/update
+				#echo "- - - - - - - - - - - - - - - - - - - - "."\n";
+			} // end switch on insert/update	
 		}  // end for each.
 		echo "Great Success! The site has been updated";
 	} else {
@@ -350,7 +332,6 @@ function AA_insertSimpleXMlObj($data){
 		echo "Failure has occured.";
 	}
 }
-
 
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */

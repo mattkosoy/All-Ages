@@ -1,9 +1,9 @@
 === All_Ages  ===
 Contributors: @mattkosoy
 Tags: vimeo, plugin
-Requires at least: 3.0.4
-Tested up to: 3.0.4
-Stable tag: 1.0
+Requires at least: 3.0.5
+Tested up to: 3.0.5
+Stable tag: 1.0.2
 
 A plugin that allows you to integrate content from Vimeo into your Wordpress site. 
 
@@ -23,6 +23,7 @@ This will create a custom post type & custom taxonomy specific for Video content
 
 == Changelog ==
 
+1.0.2  - bug fixes.
 1.0 - added support for custom post types & custom taxonomies. Dropped support for PHP4 xml parsing.  Plugin structure has been greatly improved.
 0.4 - switched to HTML5 video player
 0.3 - added in support for wpdb->prefix
